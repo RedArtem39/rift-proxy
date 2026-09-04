@@ -1,0 +1,52 @@
+{
+  "local": {
+    "host": "127.0.0.1",
+    "port": 1080,
+    "mode": "dual"
+  },
+  "auth": {
+    "enabled": false,
+    "username": "user",
+    "password": "password123"
+  },
+  "proxy_pool": {
+    "strategy": "failover",
+    "health_check_interval": 30,
+    "nodes": [
+      {
+        "name": "Canada-Montreal",
+        "type": "socks5",
+        "host": "152.232.171.125",
+        "port": 8000,
+        "username": "Yz2063",
+        "password": "zxnbKF"
+      }
+    ]
+  },
+  "routing": {
+    "enabled": true,
+    "default": "PROXY",
+    "rules": [
+      "IP-CIDR,127.0.0.0/8,DIRECT",
+      "IP-CIDR,192.168.0.0/16,DIRECT",
+      "IP-CIDR,10.0.0.0/8,DIRECT",
+      "IP-CIDR,172.16.0.0/12,DIRECT",
+      "DOMAIN-SUFFIX,local,DIRECT",
+      "DOMAIN-SUFFIX,lan,DIRECT",
+      "DOMAIN-KEYWORD,bank,DIRECT",
+      "FINAL,PROXY"
+    ]
+  },
+  "security": {
+    "kill_switch": false
+  },
+  "system_proxy": {
+    "enabled": false,
+    "bypass": "localhost;127.*;10.*;192.168.*;<local>"
+  },
+  "advanced": {
+    "buffer_size": 65536,
+    "timeout_seconds": 30,
+    "debug_log": false
+  }
+}

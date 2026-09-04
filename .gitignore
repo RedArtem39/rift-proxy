@@ -1,0 +1,29 @@
+# Build directories
+build/
+bin/
+obj/
+x64/
+x86/
+Debug/
+Release/
+
+# Visual Studio files
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.user
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.obj
+*.tlog
+*.log
+
+# Test artifacts
+test_*.bin
+*.dat
+*.tmp
