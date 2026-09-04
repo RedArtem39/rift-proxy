@@ -28,11 +28,11 @@ A high-performance, lightweight, zero-dependency C++20 proxy service and smart t
 ## Project Structure
 
 ```
-ProxyClient/
+Rift/
 ├── CMakeLists.txt        # CMake build configuration (C++20, MSVC)
 ├── build.bat             # 1-click compilation script
 ├── config.json           # Main configuration file
-├── LICENSE               # MIT License
+├── LICENSE               # GNU GPLv3 License
 ├── .gitignore            # Git ignore rules
 ├── include/
 │   ├── api_server.hpp    # REST API HTTP controller
@@ -41,6 +41,7 @@ ProxyClient/
 │   ├── http_proxy.hpp    # HTTP/HTTPS CONNECT tunnel handler
 │   ├── json.hpp          # Single-header lightweight JSON parser
 │   ├── logger.hpp        # Thread-safe ANSI console logger
+│   ├── oneshot_cli.hpp   # Direct one-shot CLI commands handler
 │   ├── router.hpp        # Smart routing engine (CIDR, Domain rules)
 │   ├── socket_utils.hpp  # Winsock RAII, traffic relaying, bandwidth stats
 │   ├── socks5.hpp        # SOCKS5 protocol engine
@@ -57,6 +58,7 @@ ProxyClient/
 │   ├── http_proxy.cpp
 │   ├── logger.cpp
 │   ├── main.cpp
+│   ├── oneshot_cli.cpp
 │   ├── router.cpp
 │   ├── socket_utils.cpp
 │   ├── socks5.cpp
@@ -65,7 +67,9 @@ ProxyClient/
 │   ├── tunnel.cpp
 │   ├── upstream.cpp
 │   ├── upstream_pool.cpp
-│   └── win_service.cpp
+│   ├── win_service.cpp
+│   ├── resource.rc       # Windows Version & metadata resource
+│   └── app.manifest      # Windows UAC & OS compatibility manifest
 └── README.md
 ```
 
@@ -91,7 +95,7 @@ cmake ..
 cmake --build . --config Release
 ```
 
-Executable output: `build/Release/proxy_client.exe`
+Executable output: `build/Release/rift.exe` (and `rft.exe` alias)
 
 ---
 
