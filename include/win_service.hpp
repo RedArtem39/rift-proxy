@@ -7,10 +7,10 @@ namespace service {
 
 class WindowsServiceManager {
 public:
-    static bool install_service(const std::wstring& service_name = L"ProxyClientService", const std::wstring& display_name = L"Proxy Client Service");
-    static bool uninstall_service(const std::wstring& service_name = L"ProxyClientService");
-    static bool start_service(const std::wstring& service_name = L"ProxyClientService");
-    static bool stop_service(const std::wstring& service_name = L"ProxyClientService");
+    static bool install_service(const std::wstring& service_name = L"RiftService", const std::wstring& display_name = L"Rift Proxy Core Service");
+    static bool uninstall_service(const std::wstring& service_name = L"RiftService");
+    static bool start_service(const std::wstring& service_name = L"RiftService");
+    static bool stop_service(const std::wstring& service_name = L"RiftService");
     static void run_as_service(const std::string& config_path);
 
 private:

@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 echo ===================================================
-echo   Building C++ Proxy Client
+echo             Building Rift (C++20)
 echo ===================================================
 
 :: Look for Visual Studio / Build Tools (including Preview/Insiders)

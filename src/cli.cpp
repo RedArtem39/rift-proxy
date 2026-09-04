@@ -20,7 +20,7 @@ CommandLineInterface::CommandLineInterface(proxy::TunnelServer& srv, std::string
     : server(srv), config_path(std::move(cfg_path)) {}
 
 void CommandLineInterface::print_banner() {
-    std::cout << "\nProxyClient v2.0 [Professional Smart Routing & Failover Service]\n"
+    std::cout << "\nRift v2.0 [Zero-Dependency Smart Routing & Proxy Service]\n"
               << "Type 'help' for command list or 'help <command>' for detailed documentation.\n\n";
 }
 
@@ -35,7 +35,7 @@ void CommandLineInterface::print_help(const std::string& specific_cmd) {
     }
 
     std::cout << "\n================================================================================\n"
-              << "                        PROXYCLIENT COMMAND INDEX                               \n"
+              << "                          RIFT COMMAND INDEX                                    \n"
               << "================================================================================\n\n"
               << "1. INSPECTION & TELEMETRY:\n"
               << "  status                 Display service runtime configuration, state, and policies\n"
@@ -504,7 +504,7 @@ void CommandLineInterface::run() {
 
     std::string line;
     while (server.is_running()) {
-        std::cout << "proxy> ";
+        std::cout << "rift> ";
         if (!std::getline(std::cin, line)) {
             break;
         }

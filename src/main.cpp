@@ -65,11 +65,11 @@ void print_usage(const char* prog) {
               << "  --start-service            Start installed Windows Service\n"
               << "  --stop-service             Stop running Windows Service\n\n"
               << "Examples:\n"
-              << "  px status                  Check running proxy status and traffic\n"
-              << "  px nodes                   List proxy pool with live latency\n"
-              << "  px switch 2                Switch to node #2\n"
-              << "  px sysproxy on             Turn on Windows system proxy\n"
-              << "  px run -s -p 1080          Start server on port 1080 with system proxy\n\n";
+              << "  rft status                 Check running proxy status and traffic\n"
+              << "  rft nodes                  List proxy pool with live latency\n"
+              << "  rft switch 2               Switch to node #2\n"
+              << "  rft sysproxy on            Turn on Windows system proxy\n"
+              << "  rft run -s -p 1080         Start server on port 1080 with system proxy\n\n";
 }
 
 int main(int argc, char* argv[]) {

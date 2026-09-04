@@ -78,7 +78,7 @@ int OneShotClient::execute_subcommand(const std::string& cmd, const std::vector<
 
     if (lower_cmd == "sysproxy") {
         if (args.empty()) {
-            std::cout << "Usage: px sysproxy <on|off>\n";
+            std::cout << "Usage: rft sysproxy <on|off>\n";
             return 1;
         }
         std::string mode = args[0];
@@ -100,7 +100,7 @@ int OneShotClient::execute_subcommand(const std::string& cmd, const std::vector<
             std::cout << "[SUCCESS] Windows System Proxy disabled.\n";
             return 0;
         } else {
-            std::cout << "Usage: px sysproxy <on|off>\n";
+            std::cout << "Usage: rft sysproxy <on|off>\n";
             return 1;
         }
     }
@@ -126,8 +126,8 @@ int OneShotClient::execute_subcommand(const std::string& cmd, const std::vector<
 
     // For daemon-dependent commands: status, nodes, rules, switch, strategy, check
     if (!is_daemon_running(api_port)) {
-        std::cout << "[ERROR] Proxy daemon is not running on port " << api_port << ".\n"
-                  << "Start daemon using: px run (or px --sysproxy)\n";
+        std::cout << "[ERROR] Rift daemon is not running on port " << api_port << ".\n"
+                  << "Start daemon using: rft run (or rft --sysproxy)\n";
         return 1;
     }
 
@@ -223,7 +223,7 @@ int OneShotClient::execute_subcommand(const std::string& cmd, const std::vector<
         }
     } else if (lower_cmd == "switch") {
         if (args.empty()) {
-            std::cout << "Usage: px switch <node_name | node_index | auto>\n";
+            std::cout << "Usage: rft switch <node_name | node_index | auto>\n";
             return 1;
         }
         std::string body = "{\"node\":\"" + args[0] + "\"}";
@@ -238,7 +238,7 @@ int OneShotClient::execute_subcommand(const std::string& cmd, const std::vector<
         }
     } else if (lower_cmd == "strategy") {
         if (args.empty()) {
-            std::cout << "Usage: px strategy <failover | best_latency | round_robin>\n";
+            std::cout << "Usage: rft strategy <failover | best_latency | round_robin>\n";
             return 1;
         }
         std::string body = "{\"strategy\":\"" + args[0] + "\"}";
@@ -263,7 +263,7 @@ int OneShotClient::execute_subcommand(const std::string& cmd, const std::vector<
         return 0;
     }
 
-    std::cout << "Unknown command: '" << cmd << "'. Type 'px help' for list of commands.\n";
+    std::cout << "Unknown command: '" << cmd << "'. Type 'rft help' for list of commands.\n";
     return 1;
 }
 

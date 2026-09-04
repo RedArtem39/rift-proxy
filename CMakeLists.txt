@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(ProxyClient LANGUAGES CXX RC)
+project(Rift LANGUAGES CXX RC)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,16 +15,16 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "include/*.hpp")
 set(RESOURCE_FILES "src/resource.rc" "src/app.manifest")
 
-add_executable(proxy_client ${SOURCES} ${HEADERS} ${RESOURCE_FILES})
+add_executable(rift ${SOURCES} ${HEADERS} ${RESOURCE_FILES})
 
-target_link_libraries(proxy_client PRIVATE ws2_32 wininet advapi32)
+target_link_libraries(rift PRIVATE ws2_32 wininet advapi32)
 
-# Copy config.json and create px.exe alias in build output
-add_custom_command(TARGET proxy_client POST_BUILD
+# Copy config.json and create rft.exe alias in build output
+add_custom_command(TARGET rift POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${CMAKE_SOURCE_DIR}/config.json"
-    $<TARGET_FILE_DIR:proxy_client>
+    $<TARGET_FILE_DIR:rift>
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:proxy_client>
-    $<TARGET_FILE_DIR:proxy_client>/px.exe
+    $<TARGET_FILE:rift>
+    $<TARGET_FILE_DIR:rift>/rft.exe
 )

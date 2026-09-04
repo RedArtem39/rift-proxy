@@ -55,7 +55,7 @@ void WINAPI WindowsServiceManager::service_ctrl_handler(DWORD ctrl_code) {
 void WINAPI WindowsServiceManager::service_main(DWORD argc, LPWSTR* argv) {
     (void)argc; (void)argv;
 
-    s_status_handle = RegisterServiceCtrlHandlerW(L"ProxyClientService", service_ctrl_handler);
+    s_status_handle = RegisterServiceCtrlHandlerW(L"RiftService", service_ctrl_handler);
     if (!s_status_handle) return;
 
     s_status.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
@@ -94,7 +94,7 @@ void WINAPI WindowsServiceManager::service_main(DWORD argc, LPWSTR* argv) {
 void WindowsServiceManager::run_as_service(const std::string& config_path) {
     s_config_path = config_path;
     SERVICE_TABLE_ENTRYW service_table[] = {
-        { (LPWSTR)L"ProxyClientService", (LPSERVICE_MAIN_FUNCTIONW)service_main },
+        { (LPWSTR)L"RiftService", (LPSERVICE_MAIN_FUNCTIONW)service_main },
         { NULL, NULL }
     };
     StartServiceCtrlDispatcherW(service_table);

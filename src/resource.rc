@@ -18,13 +18,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName",      "ProxyClient Open Source Project\0"
-            VALUE "FileDescription",  "ProxyClient - High Performance C++20 Proxy Service\0"
+            VALUE "CompanyName",      "Rift Open Source Project\0"
+            VALUE "FileDescription",  "Rift - High Performance C++20 Proxy Service\0"
             VALUE "FileVersion",      "2.0.0.0\0"
-            VALUE "InternalName",     "proxy_client\0"
-            VALUE "LegalCopyright",   "Copyright (C) 2026 ProxyClient Authors (GPLv3)\0"
-            VALUE "OriginalFilename", "proxy_client.exe\0"
-            VALUE "ProductName",      "ProxyClient\0"
+            VALUE "InternalName",     "rift\0"
+            VALUE "LegalCopyright",   "Copyright (C) 2026 Rift Authors (GPLv3)\0"
+            VALUE "OriginalFilename", "rift.exe\0"
+            VALUE "ProductName",      "Rift\0"
             VALUE "ProductVersion",   "2.0.0.0\0"
             VALUE "Comments",         "Professional Smart Routing & Failover Proxy Service for Windows\0"
         END

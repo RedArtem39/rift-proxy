@@ -2,11 +2,11 @@
 setlocal enabledelayedexpansion
 
 echo ================================================================
-echo          ProxyClient - Automated Windows Installer
+echo             Rift - Automated Windows Installer
 echo ================================================================
 
-set "INSTALL_DIR=%LOCALAPPDATA%\ProxyClient"
-set "BIN_SOURCE=%~dp0build\Release\proxy_client.exe"
+set "INSTALL_DIR=%LOCALAPPDATA%\Rift"
+set "BIN_SOURCE=%~dp0build\Release\rift.exe"
 set "CFG_SOURCE=%~dp0config.json"
 
 :: 1. Check if binary exists, otherwise build it
@@ -25,18 +25,17 @@ echo [INFO] Creating directory: %INSTALL_DIR%
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 
 :: 3. Copy binary and config
-echo [INFO] Copying executable and configuration...
-copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\proxy_client.exe" >nul
-copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\px.exe" >nul
-copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\pxy.exe" >nul
+echo [INFO] Copying executables and configuration...
+copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\rift.exe" >nul
+copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\rft.exe" >nul
 if not exist "%INSTALL_DIR%\config.json" (
     copy /y "%CFG_SOURCE%" "%INSTALL_DIR%\config.json" >nul
 )
 
 :: 4. Add to User PATH via PowerShell (safe against 1024-character setx limits)
-echo [INFO] Registering ProxyClient in User PATH...
+echo [INFO] Registering Rift in User PATH...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "$installPath = [System.Environment]::ExpandEnvironmentVariables('%LOCALAPPDATA%\ProxyClient');" ^
+    "$installPath = [System.Environment]::ExpandEnvironmentVariables('%LOCALAPPDATA%\Rift');" ^
     "$userPath = [System.Environment]::GetEnvironmentVariable('Path', 'User');" ^
     "$paths = $userPath -split ';' | Where-Object { $_ -ne '' };" ^
     "if ($paths -notcontains $installPath) {" ^
@@ -52,15 +51,15 @@ echo ================================================================
 echo   INSTALLATION COMPLETED SUCCESSFULLY!
 echo ================================================================
 echo   Location: %INSTALL_DIR%
-echo   Executables: proxy_client.exe, px.exe, pxy.exe
+echo   Executables: rift.exe, rft.exe
 echo.
 echo   You can now open any terminal (cmd / PowerShell) and use:
 echo.
-echo       px status             - Show proxy status and traffic
-echo       px nodes              - List proxy pool latency
-echo       px switch 1           - Switch active proxy node
-echo       px sysproxy on        - Enable Windows system proxy
-echo       px run                - Start proxy server daemon
-echo       px help               - Show full command reference
+echo       rft status            - Show proxy status and traffic
+echo       rft nodes             - List proxy pool latency
+echo       rft switch 1          - Switch active proxy node
+echo       rft sysproxy on       - Enable Windows system proxy
+echo       rft run               - Start Rift server daemon
+echo       rft help              - Show full command reference
 echo.
 pause

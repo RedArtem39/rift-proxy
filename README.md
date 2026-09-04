@@ -1,12 +1,13 @@
-# ProxyClient
+# Rift
 
-A high-performance, lightweight, zero-dependency C++20 proxy service for Windows with support for HTTP/HTTPS CONNECT tunneling, SOCKS5 (with RFC 1928/1929 authentication and UDP Associate), Smart Routing Rules, Upstream Proxy Pools with Auto-Failover & Latency Balancing, Windows System Proxy integration, REST API management, and Windows Service daemon mode.
+A high-performance, lightweight, zero-dependency C++20 proxy service and smart traffic routing engine for Windows with support for HTTP/HTTPS CONNECT tunneling, SOCKS5 (with RFC 1928/1929 authentication and UDP Associate), Smart Routing Rules, Upstream Proxy Pools with Auto-Failover & Latency Balancing, Windows System Proxy integration, REST API management, and Windows Service daemon mode.
 
 ---
 
 ## Key Features
 
 - **Zero External Dependencies**: Built entirely with standard C++20 and native Windows SDK libraries (`ws2_32.lib`, `wininet.lib`, `advapi32.lib`). No external packages or third-party DLLs required.
+- **Ultra-Fast CLI & Shortcut**: Control the daemon using the ultra-concise `rft` command (`rft status`, `rft switch 2`, `rft sysproxy on`) or run as an interactive shell / Windows background service.
 - **Dual Mode Inbound**: Single listening port automatically multiplexes and handles both HTTP/HTTPS CONNECT and SOCKS5 handshakes.
 - **SOCKS5 Protocol**: Complete RFC 1928 and RFC 1929 implementation supporting IPv4, IPv6, Domain names, No-Auth, Username/Password authentication, and UDP Associate.
 - **Smart Routing Engine**:
@@ -169,22 +170,22 @@ The client runs an embedded HTTP REST API on `http://127.0.0.1:9090` (CORS enabl
 
 ---
 
-## Direct CLI Mode (`px` / `proxy_client`)
+## Direct CLI Mode (`rft` / `rift`)
 
 You can control the running proxy server directly from any terminal window using quick subcommands without entering an interactive shell:
 
 ```cmd
-px status                 # Check proxy status, upstream node, and traffic metrics
-px nodes                  # List all proxy nodes with real-time ping latency
-px switch 2               # Switch active upstream proxy to node #2 (or node name)
-px strategy best_latency  # Switch selection strategy: failover | best_latency | round_robin
-px check                  # Trigger immediate health probe across all proxy nodes
-px rules                  # List active smart routing rules
-px sysproxy on            # Enable Windows System Proxy (redirects OS & browser traffic)
-px sysproxy off           # Disable Windows System Proxy
-px test google.com 443    # Measure direct TCP connection latency to destination
-px run                    # Launch server daemon in interactive console mode
-px help                   # View full command reference
+rft status                 # Check proxy status, upstream node, and traffic metrics
+rft nodes                  # List all proxy nodes with real-time ping latency
+rft switch 2               # Switch active upstream proxy to node #2 (or node name)
+rft strategy best_latency  # Switch selection strategy: failover | best_latency | round_robin
+rft check                  # Trigger immediate health probe across all proxy nodes
+rft rules                  # List active smart routing rules
+rft sysproxy on            # Enable Windows System Proxy (redirects OS & browser traffic)
+rft sysproxy off           # Disable Windows System Proxy
+rft test google.com 443    # Measure direct TCP connection latency to destination
+rft run                    # Launch server daemon in interactive console mode
+rft help                   # View full command reference
 ```
 
 ---
@@ -193,8 +194,8 @@ px help                   # View full command reference
 
 ```
 Usage:
-  px <command> [args...]
-  px [options]
+  rft <command> [args...]
+  rft [options]
 
 CLI Commands (Direct Execution):
   status                     Display daemon status, mode, and traffic metrics
@@ -232,7 +233,7 @@ Run the automated installer script:
 ```cmd
 install.bat
 ```
-This script will build the project with MSVC, copy `proxy_client.exe`, `px.exe`, `pxy.exe`, and `config.json` to `%LOCALAPPDATA%\ProxyClient`, and register the folder in your User `PATH`. You can then immediately invoke `px` or `proxy_client` from any CMD or PowerShell terminal globally.
+This script will build the project with MSVC, copy `rift.exe`, `rft.exe`, and `config.json` to `%LOCALAPPDATA%\Rift`, and register the folder in your User `PATH`. You can then immediately invoke `rft` or `rift` from any CMD or PowerShell terminal globally.
 
 To uninstall and remove from PATH:
 ```cmd
