@@ -35,6 +35,7 @@ BOOL WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType) {
 }
 
 #include "oneshot_cli.hpp"
+#include "doctor.hpp"
 
 void print_usage(const char* prog) {
     std::cout << "Usage:\n"
@@ -49,6 +50,7 @@ void print_usage(const char* prog) {
               << "  check                      Trigger immediate latency health check on all nodes\n"
               << "  sysproxy <on|off>          Enable or disable Windows System Proxy\n"
               << "  test [host] [port]         Test network connectivity to target endpoint\n"
+              << "  doctor | doktor            Validate config syntax, ports, nodes, and system health\n"
               << "  run                        Start server daemon in interactive console mode\n"
               << "  help                       Show this help message with command references\n\n"
               << "Server Daemon Options:\n"
@@ -65,6 +67,7 @@ void print_usage(const char* prog) {
               << "  --start-service            Start installed Windows Service\n"
               << "  --stop-service             Stop running Windows Service\n\n"
               << "Examples:\n"
+              << "  rft doctor                 Check configuration and node health\n"
               << "  rft status                 Check running proxy status and traffic\n"
               << "  rft nodes                  List proxy pool with live latency\n"
               << "  rft switch 2               Switch to node #2\n"
@@ -86,6 +89,13 @@ int main(int argc, char* argv[]) {
         if (first_arg == "help" || first_arg == "-h" || first_arg == "--help") {
             print_usage(argv[0]);
             return 0;
+        }
+
+        if (first_arg == "doctor" || first_arg == "doktor") {
+            net::WinsockScope winsock_scope;
+            std::string target_cfg = (argc > 2 && argv[2][0] != '-') ? argv[2] : config_path;
+            bool ok = diag::Doctor::run_diagnostics(target_cfg, true);
+            return ok ? 0 : 1;
         }
 
         // Subcommands list

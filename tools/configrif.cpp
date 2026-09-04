@@ -520,6 +520,8 @@ void menu_system_security(Config& cfg) {
 
 } // namespace configtool
 
+#include "doctor.hpp"
+
 void print_configrif_usage(const char* prog) {
     std::cout << "Rift Configuration Manager (configrif)\n\n"
               << "Interactive Mode:\n"
@@ -529,6 +531,7 @@ void print_configrif_usage(const char* prog) {
               << "  " << prog << " set-port <port>\n"
               << "  " << prog << " set-strategy <failover|best_latency|round_robin>\n"
               << "  " << prog << " preset <bypass-ru | full-tunnel | selective>\n"
+              << "  " << prog << " doctor | doktor\n"
               << "  " << prog << " test\n\n";
 }
 
@@ -545,7 +548,11 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        if (arg1 == "add-node" && argc > 2) {
+        if (arg1 == "doctor" || arg1 == "doktor") {
+            std::string target_cfg = (argc > 2 && argv[2][0] != '-') ? argv[2] : config_path;
+            bool ok = diag::Doctor::run_diagnostics(target_cfg, true);
+            return ok ? 0 : 1;
+        } else if (arg1 == "add-node" && argc > 2) {
             Config cfg = Config::load_from_file(config_path);
             UpstreamNodeConfig node;
             if (configtool::parse_proxy_line(argv[2], node)) {
@@ -611,8 +618,9 @@ int main(int argc, char* argv[]) {
                   << "  [5] System Proxy & Security   (Auto-Sysproxy: " << (cfg.enable_system_proxy ? "ON" : "OFF") << ", KillSwitch: " << (cfg.kill_switch ? "ON" : "OFF") << ")\n"
                   << "  [6] Apply Quick Routing Preset(Bypass RU / Full Tunnel / Selective)\n"
                   << "  [7] Test All Configured Nodes\n"
-                  << "  [8] View Raw JSON Config\n"
-                  << "  [9] Save and Exit\n"
+                  << "  [8] Run Doctor Diagnostics    (Comprehensive Config & System Validation)\n"
+                  << "  [9] View Raw JSON Config\n"
+                  << "  [S] Save and Exit\n"
                   << "  [0] Exit without saving\n\n"
                   << "Select option: ";
 
@@ -675,10 +683,12 @@ int main(int argc, char* argv[]) {
                 std::cout << "  #" << (i + 1) << " [" << n.name << "] " << n.host << ":" << n.port
                           << (ok ? (" -> ONLINE (" + std::to_string(lat) + " ms)") : (" -> FAILED (" + diag + ")")) << "\n";
             }
-        } else if (choice == "8") {
+        } else if (choice == "8" || choice == "doctor" || choice == "doktor" || choice == "d" || choice == "D") {
+            diag::Doctor::run_diagnostics(config_path, true);
+        } else if (choice == "9") {
             std::cout << "\n--- Current JSON Configuration ---\n"
                       << cfg.to_json_string() << "\n\n";
-        } else if (choice == "9") {
+        } else if (choice == "s" || choice == "S" || choice == "save" || choice == "10") {
             if (cfg.save_to_file(config_path)) {
                 std::cout << "[SUCCESS] Configuration saved to " << config_path << ".\n";
             } else {

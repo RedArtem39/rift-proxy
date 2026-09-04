@@ -179,6 +179,7 @@ The client runs an embedded HTTP REST API on `http://127.0.0.1:9090` (CORS enabl
 You can control the running proxy server directly from any terminal window using quick subcommands without entering an interactive shell:
 
 ```cmd
+rft doctor                 # Validate configuration syntax, ports, nodes & system readiness
 rft status                 # Check proxy status, upstream node, and traffic metrics
 rft nodes                  # List all proxy nodes with real-time ping latency
 rft switch 2               # Switch active upstream proxy to node #2 (or node name)
@@ -210,6 +211,7 @@ CLI Commands (Direct Execution):
   check                      Trigger immediate latency health check on all nodes
   sysproxy <on|off>          Enable or disable Windows System Proxy
   test [host] [port]         Test network connectivity to target endpoint
+  doctor | doktor            Validate config syntax, ports, nodes, and system health
   run                        Start server daemon in interactive console mode
   help                       Show this help message with command references
 

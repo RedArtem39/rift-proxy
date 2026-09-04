@@ -1,4 +1,5 @@
 #include "cli.hpp"
+#include "doctor.hpp"
 #include "socket_utils.hpp"
 #include "system_proxy.hpp"
 #include "upstream.hpp"
@@ -484,6 +485,8 @@ void CommandLineInterface::handle_command(const std::string& raw_line) {
             iss >> port;
         }
         test_connectivity(host, port);
+    } else if (cmd == "doctor" || cmd == "doktor") {
+        diag::Doctor::run_diagnostics(config_path, true);
     } else if (cmd == "reload") {
         Config new_cfg = Config::load_from_file(config_path);
         server.update_config(new_cfg);
