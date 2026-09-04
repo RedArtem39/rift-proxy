@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(ProxyClient LANGUAGES CXX)
+project(ProxyClient LANGUAGES CXX RC)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,10 +13,11 @@ include_directories(include)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE HEADERS "include/*.hpp")
+set(RESOURCE_FILES "src/resource.rc" "src/app.manifest")
 
-add_executable(proxy_client ${SOURCES} ${HEADERS})
+add_executable(proxy_client ${SOURCES} ${HEADERS} ${RESOURCE_FILES})
 
-target_link_libraries(proxy_client PRIVATE ws2_32 wininet)
+target_link_libraries(proxy_client PRIVATE ws2_32 wininet advapi32)
 
 # Copy config.json to build output
 add_custom_command(TARGET proxy_client POST_BUILD
