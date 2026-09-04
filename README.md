@@ -192,6 +192,21 @@ Windows Service Options:
 
 ---
 
+## Installation & Global PATH Setup
+
+Run the automated installer script:
+```cmd
+install.bat
+```
+This script will build the binary, copy it along with `config.json` to `%LOCALAPPDATA%\ProxyClient`, and register it in your User `PATH`. You can then invoke `proxy_client` from any command prompt or PowerShell window globally across Windows.
+
+To uninstall and remove from PATH:
+```cmd
+uninstall.bat
+```
+
+---
+
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [GNU General Public License v3.0 (GPL-3.0)](LICENSE).
