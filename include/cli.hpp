@@ -15,7 +15,9 @@ private:
     std::string config_path;
 
     void print_banner();
-    void print_help();
+    void print_help(const std::string& specific_cmd = "");
+    void print_command_doc(const std::string& cmd);
+    void print_all_docs();
     void print_status();
     void print_stats();
     void print_active_connections();

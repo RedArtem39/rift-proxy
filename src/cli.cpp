@@ -7,34 +7,236 @@
 #include <iomanip>
 #include <sstream>
 #include <chrono>
+#include <algorithm>
 
 namespace cli {
+
+static std::string to_lower_str(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return (char)std::tolower(c); });
+    return s;
+}
 
 CommandLineInterface::CommandLineInterface(proxy::TunnelServer& srv, std::string cfg_path)
     : server(srv), config_path(std::move(cfg_path)) {}
 
 void CommandLineInterface::print_banner() {
     std::cout << "\nProxyClient v2.0 [Professional Smart Routing & Failover Service]\n"
-              << "Type 'help' for command list or 'quit' to exit.\n\n";
+              << "Type 'help' for command list or 'help <command>' for detailed documentation.\n\n";
 }
 
-void CommandLineInterface::print_help() {
-    std::cout << "\nCommands:\n"
-              << "  status                 Show server configuration, mode and pool state\n"
-              << "  stats                  Show global traffic metrics (Tx/Rx)\n"
-              << "  conns                  Show active connections and timers\n"
-              << "  nodes / pool           Show upstream proxy pool and latency status\n"
-              << "  rules                  Show active smart routing rules\n"
-              << "  check                  Trigger immediate health check on all nodes\n"
-              << "  switch <name|id|auto>  Switch active proxy node or revert to auto\n"
-              << "  strategy <name>        Set pool strategy (failover|best_latency|round_robin)\n"
-              << "  test <host> <port>     Run latency and route probe\n"
-              << "  sysproxy on|off        Toggle Windows system proxy settings\n"
-              << "  debug on|off           Toggle debug output\n"
-              << "  reload                 Reload config.json\n"
-              << "  clear                  Clear console screen\n"
-              << "  help                   Show this list\n"
-              << "  quit / exit            Stop service and exit\n\n";
+void CommandLineInterface::print_help(const std::string& specific_cmd) {
+    if (!specific_cmd.empty()) {
+        if (specific_cmd == "all") {
+            print_all_docs();
+        } else {
+            print_command_doc(specific_cmd);
+        }
+        return;
+    }
+
+    std::cout << "\n================================================================================\n"
+              << "                        PROXYCLIENT COMMAND INDEX                               \n"
+              << "================================================================================\n\n"
+              << "1. INSPECTION & TELEMETRY:\n"
+              << "  status                 Display service runtime configuration, state, and policies\n"
+              << "  stats                  Display global bandwidth (Tx/Rx) and total connection metrics\n"
+              << "  conns                  Display real-time table of active connections with timers\n"
+              << "  nodes / pool           Display upstream proxy pool status, latency, and fail counts\n"
+              << "  rules                  Display smart routing classification rules and default action\n\n"
+              << "2. POOL & ROUTING MANAGEMENT:\n"
+              << "  check                  Trigger immediate ping / health check on all upstream nodes\n"
+              << "  switch <name|#|auto>   Manually switch active upstream proxy or revert to auto\n"
+              << "  strategy <name>        Change pool strategy (failover | best_latency | round_robin)\n"
+              << "  test <host> [port]     Probe network path, latency, and routing for a target endpoint\n\n"
+              << "3. SYSTEM & RUNTIME CONTROLS:\n"
+              << "  sysproxy <on|off>      Toggle Windows System Proxy (WinINet) for system-wide routing\n"
+              << "  debug <on|off>         Toggle verbose debug logging in console\n"
+              << "  reload                 Hot-reload configuration from config.json without restart\n"
+              << "  clear / cls            Clear the terminal screen buffer\n"
+              << "  help [cmd|all]         Display this index or full documentation for a specific command\n"
+              << "  quit / exit            Stop proxy service, restore Windows settings, and exit\n\n"
+              << "Tip: Type 'help <command>' (e.g. 'help switch', 'help rules', 'help test') for detailed docs.\n"
+              << "     Type 'help all' to read the complete reference manual.\n\n";
+}
+
+void CommandLineInterface::print_command_doc(const std::string& raw_cmd) {
+    std::string cmd = to_lower_str(raw_cmd);
+
+    if (cmd == "status") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: status ---\n"
+                  << "SYNTAX:        status\n"
+                  << "DESCRIPTION:   Displays the complete operational status of the proxy server.\n"
+                  << "OUTPUT FIELDS: - Service State: Whether the core listeners are RUNNING or STOPPED.\n"
+                  << "               - Listen Address: IP and Port where the local server accepts connections.\n"
+                  << "               - Local Mode: DUAL (HTTP + SOCKS5), SOCKS5, or HTTP.\n"
+                  << "               - Local Auth: Local username/password authentication requirement.\n"
+                  << "               - Smart Routing: Enabled state and default routing action (PROXY/DIRECT).\n"
+                  << "               - Pool Strategy: Active upstream selection strategy (FAILOVER, BEST_LATENCY, etc.).\n"
+                  << "               - Kill Switch: Whether non-proxied leak protection is active.\n"
+                  << "               - System Proxy: Whether Windows WinINet system-wide routing is enabled.\n"
+                  << "REST API:      GET /api/status\n\n";
+    } else if (cmd == "stats") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: stats ---\n"
+                  << "SYNTAX:        stats\n"
+                  << "DESCRIPTION:   Displays real-time cumulative traffic and throughput metrics.\n"
+                  << "OUTPUT FIELDS: - Active Connections: Number of client sockets currently open and relaying.\n"
+                  << "               - Total Handled: Lifetime count of client connections processed.\n"
+                  << "               - Transmitted (Tx): Total volume of data sent to upstream targets.\n"
+                  << "               - Received (Rx): Total volume of data received from upstream targets.\n"
+                  << "REST API:      GET /api/status (metrics section)\n\n";
+    } else if (cmd == "conns" || cmd == "connections") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: conns ---\n"
+                  << "SYNTAX:        conns\n"
+                  << "ALIAS:         connections, list\n"
+                  << "DESCRIPTION:   Renders an interactive tabular view of all currently active TCP/UDP\n"
+                  << "               connections passing through the proxy pipeline.\n"
+                  << "COLUMNS:       - ID: Unique monotonically increasing connection identifier.\n"
+                  << "               - PROTO: Client protocol (HTTP CONNECT, HTTP Plain, SOCKS5 TCP, SOCKS5 UDP).\n"
+                  << "               - CLIENT: Source IP address and ephemeral source port.\n"
+                  << "               - TARGET: Destination hostname/IP and destination port.\n"
+                  << "               - STAGE: Real-time pipeline stage (e.g. CONNECTING_UPSTREAM, ACTIVE_TUNNEL).\n"
+                  << "               - DURATION: Total elapsed wall-clock time since socket acceptance.\n"
+                  << "               - IDLE: Elapsed time since the last packet was relayed.\n"
+                  << "               - TX / RX: Transferred payload volume for this specific session.\n\n";
+    } else if (cmd == "nodes" || cmd == "pool") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: nodes ---\n"
+                  << "SYNTAX:        nodes\n"
+                  << "ALIAS:         pool\n"
+                  << "DESCRIPTION:   Displays all upstream proxy servers configured in the proxy pool.\n"
+                  << "COLUMNS:       - #: Numerical index (used as a shorthand for 'switch <#>' command).\n"
+                  << "               - NAME: Custom human-readable node name specified in config.json.\n"
+                  << "               - TYPE: Protocol type of the upstream proxy (SOCKS5 or HTTP).\n"
+                  << "               - ENDPOINT: Remote host and port of the proxy.\n"
+                  << "               - STATUS: Health check status (ONLINE if reachable, OFFLINE if unresponsive).\n"
+                  << "               - LATENCY: Round-trip handshake ping in milliseconds measured by Health Check.\n"
+                  << "               - FAILS: Consecutive connection failure counter (triggers auto-failover at 2).\n"
+                  << "REST API:      GET /api/nodes\n\n";
+    } else if (cmd == "rules") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: rules ---\n"
+                  << "SYNTAX:        rules\n"
+                  << "DESCRIPTION:   Lists all active Smart Routing traffic classification rules in evaluation order.\n"
+                  << "RULE TYPES:    - DOMAIN-SUFFIX: Matches exact domain and all subdomains (e.g. 'google.com').\n"
+                  << "               - DOMAIN-KEYWORD: Substring match anywhere in hostname (e.g. 'bank').\n"
+                  << "               - DOMAIN: Strict exact match of hostname.\n"
+                  << "               - IP-CIDR: IPv4 subnet range matching (e.g. '192.168.0.0/16', '10.0.0.0/8').\n"
+                  << "               - FINAL: Default fallback match when no earlier rule matches.\n"
+                  << "ACTIONS:       - DIRECT: Outbound TCP/UDP connection is made directly bypassing proxy.\n"
+                  << "               - PROXY: Outbound traffic is forwarded through the upstream proxy pool.\n"
+                  << "               - REJECT: Connection is immediately blocked and dropped.\n"
+                  << "REST API:      GET /api/rules\n\n";
+    } else if (cmd == "check") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: check ---\n"
+                  << "SYNTAX:        check\n"
+                  << "DESCRIPTION:   Immediately triggers an asynchronous health check and latency probe across\n"
+                  << "               every node in the upstream proxy pool without waiting for the background timer.\n"
+                  << "BEHAVIOR:      - Attempts TCP handshake and protocol handshake with each node.\n"
+                  << "               - Updates 'LATENCY' and 'STATUS' (ONLINE/OFFLINE) columns in real time.\n"
+                  << "               - Resets failure counters for nodes that successfully respond.\n"
+                  << "REST API:      POST /api/check\n\n";
+    } else if (cmd == "switch") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: switch ---\n"
+                  << "SYNTAX:        switch <node_name | node_index | auto>\n"
+                  << "DESCRIPTION:   Manually pins outgoing proxy traffic to a specific upstream node or returns\n"
+                  << "               to automatic pool strategy (Failover / Best Latency / Round Robin).\n"
+                  << "PARAMETERS:    - <node_name>: Exact name of the node (e.g. 'Canada-Montreal', 'US-East').\n"
+                  << "               - <node_index>: Numerical index from 'nodes' table (e.g. 'switch 1').\n"
+                  << "               - auto: Clears manual override and resumes automatic pool strategy.\n"
+                  << "EXAMPLES:      switch Canada-Montreal   -> Locks outbound routing to Canada node\n"
+                  << "               switch 2                 -> Switches to node #2 in the pool\n"
+                  << "               switch auto              -> Restores automatic balancing\n"
+                  << "REST API:      POST /api/switch (Body: {\"node\":\"Canada-Montreal\"} or {\"node\":\"auto\"})\n\n";
+    } else if (cmd == "strategy") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: strategy ---\n"
+                  << "SYNTAX:        strategy <failover | best_latency | round_robin>\n"
+                  << "DESCRIPTION:   Sets the active routing strategy for selecting nodes from the proxy pool.\n"
+                  << "STRATEGIES:    - failover: Always routes through the primary node; automatically shifts\n"
+                  << "                 to the backup node if the primary fails 2 consecutive connections.\n"
+                  << "               - best_latency: Dynamically routes connections through the proxy node with\n"
+                  << "                 the lowest measured ping latency based on periodic Health Checks.\n"
+                  << "               - round_robin: Cycles through healthy nodes sequentially for each new request.\n"
+                  << "EXAMPLES:      strategy best_latency    -> Prioritizes fastest available proxy\n"
+                  << "               strategy failover        -> Strict primary/secondary redundancy\n"
+                  << "REST API:      POST /api/strategy (Body: {\"strategy\":\"best_latency\"})\n\n";
+    } else if (cmd == "test") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: test ---\n"
+                  << "SYNTAX:        test <host> [port]\n"
+                  << "DESCRIPTION:   Performs an active network route and latency probe to a target endpoint\n"
+                  << "               through the full Smart Routing and Proxy Pool pipeline.\n"
+                  << "PARAMETERS:    - <host>: Domain name or IP address to probe (e.g. 'google.com', '1.1.1.1').\n"
+                  << "               - [port]: TCP port (optional, defaults to 443 if omitted).\n"
+                  << "OUTPUT:        Reports whether connection succeeded or failed, the matched routing rule,\n"
+                  << "               upstream node used, and exact connection duration in milliseconds.\n"
+                  << "EXAMPLES:      test google.com 443\n"
+                  << "               test 1.1.1.1 53\n"
+                  << "               test internal.corp.net 8080\n\n";
+    } else if (cmd == "sysproxy") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: sysproxy ---\n"
+                  << "SYNTAX:        sysproxy <on | off>\n"
+                  << "DESCRIPTION:   Controls the global Windows Internet Settings (WinINet) system proxy.\n"
+                  << "BEHAVIOR:      - 'sysproxy on': Writes proxy settings to HKCU\\Software\\Microsoft\\Windows\\\n"
+                  << "                 CurrentVersion\\Internet Settings and broadcasts INTERNET_OPTION_SETTINGS_CHANGED.\n"
+                  << "                 All Windows web browsers (Chrome, Edge, Firefox), system apps, and curl\n"
+                  << "                 immediately route their traffic through ProxyClient without rebooting.\n"
+                  << "               - 'sysproxy off': Disables system proxy and restores direct network routing.\n"
+                  << "SAFETY:        Original Windows proxy settings are backed up on startup and automatically\n"
+                  << "               restored when ProxyClient terminates or receives Ctrl+C.\n"
+                  << "REST API:      POST /api/sysproxy (Body: {\"enable\":true} or {\"enable\":false})\n\n";
+    } else if (cmd == "debug") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: debug ---\n"
+                  << "SYNTAX:        debug <on | off>\n"
+                  << "DESCRIPTION:   Controls verbose packet-level and diagnostic logging in the console.\n"
+                  << "BEHAVIOR:      - 'debug on': Displays detailed internal logs, health check probes,\n"
+                  << "                 SOCKS5 handshake byte exchanges, and fine-grained session durations.\n"
+                  << "               - 'debug off': Filters out debug entries and shows only essential\n"
+                  << "                 connection lifecycle and error events.\n\n";
+    } else if (cmd == "reload") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: reload ---\n"
+                  << "SYNTAX:        reload\n"
+                  << "DESCRIPTION:   Hot-reloads configuration from config.json without restarting the process.\n"
+                  << "UPDATES:       - Re-reads proxy pool nodes, credentials, and endpoints.\n"
+                  << "               - Re-loads and compiles Smart Routing rules.\n"
+                  << "               - Updates pool balancing strategy and timeout thresholds.\n"
+                  << "               - Active open connections continue running without interruption.\n\n";
+    } else if (cmd == "clear" || cmd == "cls") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: clear ---\n"
+                  << "SYNTAX:        clear\n"
+                  << "ALIAS:         cls\n"
+                  << "DESCRIPTION:   Clears the terminal screen buffer and re-displays the startup banner.\n\n";
+    } else if (cmd == "quit" || cmd == "exit") {
+        std::cout << "\n--- COMMAND DOCUMENTATION: quit ---\n"
+                  << "SYNTAX:        quit\n"
+                  << "ALIAS:         exit\n"
+                  << "DESCRIPTION:   Gracefully shuts down the ProxyClient service.\n"
+                  << "SHUTDOWN STEPS:- Restores original Windows System Proxy settings in registry.\n"
+                  << "               - Stops background Health Checker thread.\n"
+                  << "               - Terminates REST API server.\n"
+                  << "               - Closes local listening sockets and shuts down active worker threads.\n\n";
+    } else {
+        std::cout << "\nUnknown command: '" << raw_cmd << "'. Type 'help' for a full list of available commands.\n\n";
+    }
+}
+
+void CommandLineInterface::print_all_docs() {
+    std::cout << "\n================================================================================\n"
+              << "                   PROXYCLIENT FULL REFERENCE MANUAL                            \n"
+              << "================================================================================\n";
+    print_command_doc("status");
+    print_command_doc("stats");
+    print_command_doc("conns");
+    print_command_doc("nodes");
+    print_command_doc("rules");
+    print_command_doc("check");
+    print_command_doc("switch");
+    print_command_doc("strategy");
+    print_command_doc("test");
+    print_command_doc("sysproxy");
+    print_command_doc("debug");
+    print_command_doc("reload");
+    print_command_doc("clear");
+    print_command_doc("quit");
+    std::cout << "================================================================================\n"
+              << "                        END OF REFERENCE MANUAL                                 \n"
+              << "================================================================================\n\n";
 }
 
 void CommandLineInterface::print_status() {
@@ -189,7 +391,12 @@ void CommandLineInterface::test_connectivity(const std::string& host, int port) 
     }
 }
 
-void CommandLineInterface::handle_command(const std::string& line) {
+void CommandLineInterface::handle_command(const std::string& raw_line) {
+    std::string line = raw_line;
+    // Strip UTF-8 BOM if present
+    if (line.size() >= 3 && (unsigned char)line[0] == 0xEF && (unsigned char)line[1] == 0xBB && (unsigned char)line[2] == 0xBF) {
+        line = line.substr(3);
+    }
     std::istringstream iss(line);
     std::string cmd;
     iss >> cmd;
@@ -197,12 +404,14 @@ void CommandLineInterface::handle_command(const std::string& line) {
     if (cmd.empty()) return;
 
     if (cmd == "help" || cmd == "?") {
-        print_help();
+        std::string sub;
+        iss >> sub;
+        print_help(sub);
     } else if (cmd == "status") {
         print_status();
     } else if (cmd == "stats") {
         print_stats();
-    } else if (cmd == "conns" || cmd == "connections") {
+    } else if (cmd == "conns" || cmd == "connections" || cmd == "list") {
         print_active_connections();
     } else if (cmd == "nodes" || cmd == "pool") {
         print_nodes();
@@ -218,10 +427,11 @@ void CommandLineInterface::handle_command(const std::string& line) {
             if (server.get_pool().manual_select(target)) {
                 std::cout << "Active node switched to: " << server.get_pool().get_active_strategy_name() << "\n";
             } else {
-                std::cout << "Node '" << target << "' not found in pool.\n";
+                std::cout << "Node '" << target << "' not found in pool. Type 'nodes' to list available nodes.\n";
             }
         } else {
-            std::cout << "Usage: switch <node_name | node_number | auto>\n";
+            std::cout << "Usage: switch <node_name | node_number | auto>\n"
+                      << "Type 'help switch' for detailed documentation.\n";
         }
     } else if (cmd == "strategy") {
         std::string strat;
@@ -239,7 +449,8 @@ void CommandLineInterface::handle_command(const std::string& line) {
                 std::cout << "Available strategies: failover, best_latency, round_robin\n";
             }
         } else {
-            std::cout << "Usage: strategy <failover|best_latency|round_robin>\n";
+            std::cout << "Usage: strategy <failover|best_latency|round_robin>\n"
+                      << "Type 'help strategy' for detailed documentation.\n";
         }
     } else if (cmd == "sysproxy") {
         std::string sub;
@@ -250,7 +461,8 @@ void CommandLineInterface::handle_command(const std::string& line) {
         } else if (sub == "off") {
             sys::SystemProxyManager::disable();
         } else {
-            std::cout << "Usage: sysproxy on|off\n";
+            std::cout << "Usage: sysproxy on|off\n"
+                      << "Type 'help sysproxy' for detailed documentation.\n";
         }
     } else if (cmd == "debug") {
         std::string sub;
@@ -262,7 +474,8 @@ void CommandLineInterface::handle_command(const std::string& line) {
             Logger::set_debug(false);
             std::cout << "Debug logging disabled.\n";
         } else {
-            std::cout << "Usage: debug on|off\n";
+            std::cout << "Usage: debug on|off\n"
+                      << "Type 'help debug' for detailed documentation.\n";
         }
     } else if (cmd == "test") {
         std::string host = "1.1.1.1";
