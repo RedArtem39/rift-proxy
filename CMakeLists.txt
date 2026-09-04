@@ -16,8 +16,11 @@ file(GLOB_RECURSE HEADERS "include/*.hpp")
 set(RESOURCE_FILES "src/resource.rc" "src/app.manifest")
 
 add_executable(rift ${SOURCES} ${HEADERS} ${RESOURCE_FILES})
-
 target_link_libraries(rift PRIVATE ws2_32 wininet advapi32)
+
+# Config Manager Tool
+add_executable(configrif tools/configrif.cpp src/config.cpp src/socket_utils.cpp src/logger.cpp ${HEADERS})
+target_link_libraries(configrif PRIVATE ws2_32 wininet advapi32)
 
 # Copy config.json and create rft.exe alias in build output
 add_custom_command(TARGET rift POST_BUILD

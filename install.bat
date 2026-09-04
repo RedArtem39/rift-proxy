@@ -28,6 +28,9 @@ if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 echo [INFO] Copying executables and configuration...
 copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\rift.exe" >nul
 copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\rft.exe" >nul
+if exist "%~dp0build\Release\configrif.exe" (
+    copy /y "%~dp0build\Release\configrif.exe" "%INSTALL_DIR%\configrif.exe" >nul
+)
 if not exist "%INSTALL_DIR%\config.json" (
     copy /y "%CFG_SOURCE%" "%INSTALL_DIR%\config.json" >nul
 )
@@ -51,7 +54,7 @@ echo ================================================================
 echo   INSTALLATION COMPLETED SUCCESSFULLY!
 echo ================================================================
 echo   Location: %INSTALL_DIR%
-echo   Executables: rift.exe, rft.exe
+echo   Executables: rift.exe, rft.exe, configrif.exe
 echo.
 echo   You can now open any terminal (cmd / PowerShell) and use:
 echo.
@@ -60,6 +63,7 @@ echo       rft nodes             - List proxy pool latency
 echo       rft switch 1          - Switch active proxy node
 echo       rft sysproxy on       - Enable Windows system proxy
 echo       rft run               - Start Rift server daemon
+echo       configrif             - Interactive visual config manager
 echo       rft help              - Show full command reference
 echo.
 pause
