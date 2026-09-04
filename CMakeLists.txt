@@ -19,9 +19,12 @@ add_executable(proxy_client ${SOURCES} ${HEADERS} ${RESOURCE_FILES})
 
 target_link_libraries(proxy_client PRIVATE ws2_32 wininet advapi32)
 
-# Copy config.json to build output
+# Copy config.json and create px.exe alias in build output
 add_custom_command(TARGET proxy_client POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${CMAKE_SOURCE_DIR}/config.json"
     $<TARGET_FILE_DIR:proxy_client>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:proxy_client>
+    $<TARGET_FILE_DIR:proxy_client>/px.exe
 )

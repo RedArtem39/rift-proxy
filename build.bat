@@ -5,10 +5,22 @@ echo ===================================================
 echo   Building C++ Proxy Client
 echo ===================================================
 
-:: Look for Visual Studio / Build Tools
+:: Look for Visual Studio / Build Tools (including Preview/Insiders)
 set "VS_DIR="
-for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2^>nul`) do (
+for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -property installationPath 2^>nul`) do (
     set "VS_DIR=%%i"
+)
+
+if not defined VS_DIR (
+    if exist "C:\Program Files\Microsoft Visual Studio\18\Insiders" (
+        set "VS_DIR=C:\Program Files\Microsoft Visual Studio\18\Insiders"
+    ) else if exist "C:\Program Files\Microsoft Visual Studio\2022\Community" (
+        set "VS_DIR=C:\Program Files\Microsoft Visual Studio\2022\Community"
+    ) else if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional" (
+        set "VS_DIR=C:\Program Files\Microsoft Visual Studio\2022\Professional"
+    ) else if exist "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" (
+        set "VS_DIR=C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+    )
 )
 
 if not defined VS_DIR (
@@ -18,6 +30,11 @@ if not defined VS_DIR (
 )
 
 echo Found Visual Studio at: %VS_DIR%
+
+:: Setup PATH to include VS bundled CMake if not in system PATH
+if exist "%VS_DIR%\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin" (
+    set "PATH=%VS_DIR%\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin;%PATH%"
+)
 
 call "%VS_DIR%\VC\Auxiliary\Build\vcvars64.bat" >nul 2>&1
 if %errorlevel% neq 0 (

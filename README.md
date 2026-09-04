@@ -169,12 +169,46 @@ The client runs an embedded HTTP REST API on `http://127.0.0.1:9090` (CORS enabl
 
 ---
 
+## Direct CLI Mode (`px` / `proxy_client`)
+
+You can control the running proxy server directly from any terminal window using quick subcommands without entering an interactive shell:
+
+```cmd
+px status                 # Check proxy status, upstream node, and traffic metrics
+px nodes                  # List all proxy nodes with real-time ping latency
+px switch 2               # Switch active upstream proxy to node #2 (or node name)
+px strategy best_latency  # Switch selection strategy: failover | best_latency | round_robin
+px check                  # Trigger immediate health probe across all proxy nodes
+px rules                  # List active smart routing rules
+px sysproxy on            # Enable Windows System Proxy (redirects OS & browser traffic)
+px sysproxy off           # Disable Windows System Proxy
+px test google.com 443    # Measure direct TCP connection latency to destination
+px run                    # Launch server daemon in interactive console mode
+px help                   # View full command reference
+```
+
+---
+
 ## Command Line Options
 
 ```
-Usage: proxy_client.exe [options]
+Usage:
+  px <command> [args...]
+  px [options]
 
-General Options:
+CLI Commands (Direct Execution):
+  status                     Display daemon status, mode, and traffic metrics
+  nodes | pool               List all upstream nodes with latency and status
+  rules                      Show smart routing rules and default routing policy
+  switch <node|idx|auto>     Switch active upstream proxy node
+  strategy <name>            Set pool strategy (failover | best_latency | round_robin)
+  check                      Trigger immediate latency health check on all nodes
+  sysproxy <on|off>          Enable or disable Windows System Proxy
+  test [host] [port]         Test network connectivity to target endpoint
+  run                        Start server daemon in interactive console mode
+  help                       Show this help message with command references
+
+Server Daemon Options:
   -c, --config <file>        Path to configuration JSON file (default: config.json)
   -p, --port <port>          Override local listening port (default: 1080)
   -m, --mode <dual|socks5|http> Set local proxy protocol mode (default: dual)
@@ -198,7 +232,7 @@ Run the automated installer script:
 ```cmd
 install.bat
 ```
-This script will build the binary, copy it along with `config.json` to `%LOCALAPPDATA%\ProxyClient`, and register it in your User `PATH`. You can then invoke `proxy_client` from any command prompt or PowerShell window globally across Windows.
+This script will build the project with MSVC, copy `proxy_client.exe`, `px.exe`, `pxy.exe`, and `config.json` to `%LOCALAPPDATA%\ProxyClient`, and register the folder in your User `PATH`. You can then immediately invoke `px` or `proxy_client` from any CMD or PowerShell terminal globally.
 
 To uninstall and remove from PATH:
 ```cmd

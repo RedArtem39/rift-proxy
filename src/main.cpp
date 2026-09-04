@@ -34,9 +34,24 @@ BOOL WINAPI ConsoleHandlerRoutine(DWORD dwCtrlType) {
     }
 }
 
+#include "oneshot_cli.hpp"
+
 void print_usage(const char* prog) {
-    std::cout << "Usage: " << prog << " [options]\n\n"
-              << "General Options:\n"
+    std::cout << "Usage:\n"
+              << "  " << prog << " <command> [args...]\n"
+              << "  " << prog << " [options]\n\n"
+              << "CLI Commands (Direct Execution):\n"
+              << "  status                     Display daemon status, mode, and traffic metrics\n"
+              << "  nodes | pool               List all upstream nodes with latency and status\n"
+              << "  rules                      Show smart routing rules and default routing policy\n"
+              << "  switch <node|idx|auto>     Switch active upstream proxy node\n"
+              << "  strategy <name>            Set pool strategy (failover | best_latency | round_robin)\n"
+              << "  check                      Trigger immediate latency health check on all nodes\n"
+              << "  sysproxy <on|off>          Enable or disable Windows System Proxy\n"
+              << "  test [host] [port]         Test network connectivity to target endpoint\n"
+              << "  run                        Start server daemon in interactive console mode\n"
+              << "  help                       Show this help message with command references\n\n"
+              << "Server Daemon Options:\n"
               << "  -c, --config <file>        Path to configuration JSON file (default: config.json)\n"
               << "  -p, --port <port>          Override local listening port (default: 1080)\n"
               << "  -m, --mode <dual|socks5|http> Set local proxy protocol mode (default: dual)\n"
@@ -48,7 +63,13 @@ void print_usage(const char* prog) {
               << "  --install-service          Install as a Windows Background Service\n"
               << "  --uninstall-service        Uninstall Windows Service\n"
               << "  --start-service            Start installed Windows Service\n"
-              << "  --stop-service             Stop running Windows Service\n\n";
+              << "  --stop-service             Stop running Windows Service\n\n"
+              << "Examples:\n"
+              << "  px status                  Check running proxy status and traffic\n"
+              << "  px nodes                   List proxy pool with live latency\n"
+              << "  px switch 2                Switch to node #2\n"
+              << "  px sysproxy on             Turn on Windows system proxy\n"
+              << "  px run -s -p 1080          Start server on port 1080 with system proxy\n\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -59,9 +80,48 @@ int main(int argc, char* argv[]) {
     bool debug_flag = false;
     int api_port = 9090;
 
+    // Check for direct subcommands
+    if (argc > 1) {
+        std::string first_arg = argv[1];
+        if (first_arg == "help" || first_arg == "-h" || first_arg == "--help") {
+            print_usage(argv[0]);
+            return 0;
+        }
+
+        // Subcommands list
+        static const std::vector<std::string> subcommands = {
+            "status", "nodes", "pool", "rules", "switch", "strategy", "check", "sysproxy", "test"
+        };
+
+        bool is_subcommand = false;
+        for (const auto& sc : subcommands) {
+            if (first_arg == sc) {
+                is_subcommand = true;
+                break;
+            }
+        }
+
+        if (is_subcommand) {
+            net::WinsockScope winsock_scope;
+            std::vector<std::string> sub_args;
+            for (int i = 2; i < argc; ++i) {
+                std::string a = argv[i];
+                if (a == "--api-port" && i + 1 < argc) {
+                    api_port = std::stoi(argv[++i]);
+                } else {
+                    sub_args.push_back(a);
+                }
+            }
+            return cli::OneShotClient::execute_subcommand(first_arg, sub_args, api_port);
+        }
+    }
+
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
-        if (arg == "--install-service") {
+        if (arg == "run") {
+            // Explicit run command - continue to server start
+            continue;
+        } else if (arg == "--install-service") {
             return service::WindowsServiceManager::install_service() ? 0 : 1;
         } else if (arg == "--uninstall-service") {
             return service::WindowsServiceManager::uninstall_service() ? 0 : 1;

@@ -27,6 +27,8 @@ if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 :: 3. Copy binary and config
 echo [INFO] Copying executable and configuration...
 copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\proxy_client.exe" >nul
+copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\px.exe" >nul
+copy /y "%BIN_SOURCE%" "%INSTALL_DIR%\pxy.exe" >nul
 if not exist "%INSTALL_DIR%\config.json" (
     copy /y "%CFG_SOURCE%" "%INSTALL_DIR%\config.json" >nul
 )
@@ -49,9 +51,16 @@ echo.
 echo ================================================================
 echo   INSTALLATION COMPLETED SUCCESSFULLY!
 echo ================================================================
-echo   Location: %INSTALL_DIR%\proxy_client.exe
-echo   You can now open any new terminal (cmd / PowerShell) and run:
+echo   Location: %INSTALL_DIR%
+echo   Executables: proxy_client.exe, px.exe, pxy.exe
 echo.
-echo       proxy_client
+echo   You can now open any terminal (cmd / PowerShell) and use:
+echo.
+echo       px status             - Show proxy status and traffic
+echo       px nodes              - List proxy pool latency
+echo       px switch 1           - Switch active proxy node
+echo       px sysproxy on        - Enable Windows system proxy
+echo       px run                - Start proxy server daemon
+echo       px help               - Show full command reference
 echo.
 pause
